@@ -1,0 +1,79 @@
+from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5HifiGan
+from datasets import load_dataset
+from IPython.display import Audio
+import torch
+import accelerate
+import gradio as gr
+import soundfile as sf
+import numpy
+import ffmpeg
+
+
+def audio_to_audio(filename):
+
+    # Automatic Speech Recognition (Speech-to-Text)
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+    model_id = "openai/whisper-large-v3"
+
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_id, torch_dtype=torch_dtype, use_safetensors=True, low_cpu_mem_usage=True)
+
+    model.to(device)
+
+    processor = AutoProcessor.from_pretrained(model_id)
+
+    pipe = pipeline(
+        "automatic-speech-recognition",
+        model=model,
+        tokenizer=processor.tokenizer,
+        feature_extractor=processor.feature_extractor,
+        max_new_tokens=128,
+        chunk_length_s=30,
+        batch_size=16,
+        return_timestamps=True,
+        torch_dtype=torch_dtype,
+        device=device,
+    )
+
+    result = pipe(filename)
+    transcribed_text = result["text"]
+    
+    # Text Summarization
+    generator = pipeline(model="google/flan-t5-xl", max_new_tokens=128)
+
+    def summarize_speech(text):
+        output = generator("summarize: " + transcribed_text)
+        return output[0]
+
+    summarized_text = summarize_speech(transcribed_text)
+    summarized_text = summarized_text["generated_text"]
+
+    # Text-to-Speech
+    tts_checkpoint = "microsoft/speecht5_tts"
+    tts_dataset = "Matthijs/cmu-arctic-xvectors"
+    tts_vocoder = "microsoft/speecht5_hifigan"
+
+    def text_to_speech(input_text):
+
+        processor = SpeechT5Processor.from_pretrained(tts_checkpoint)
+        model = SpeechT5ForTextToSpeech.from_pretrained(tts_checkpoint)
+
+        inputs = processor(text=input_text, return_tensors="pt")
+
+        embeddings_dataset = load_dataset(tts_dataset, split="validation")
+
+        speaker_embeddings = torch.tensor(embeddings_dataset[7306]["xvector"]).unsqueeze(0)
+        
+        vocoder = SpeechT5HifiGan.from_pretrained(tts_vocoder)
+
+        speech = model.generate_speech(inputs["input_ids"], speaker_embeddings, vocoder=vocoder)
+
+        return Audio(speech, rate = 16000)
+
+    summarized_audio = text_to_speech(summarized_text)
+    return summarized_audio
+
+  audio_to_audio("examplefile.wav")
