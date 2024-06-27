@@ -14,22 +14,22 @@ soundfile
 ffmpeg
 
 # Step 1: Automatic Speech Recognition (ASR)
-Model used: openai/whisper-large-v3
+Model used: openai/whisper-large-v3<br/>
 Check file for implementation
 
 # Step 2: Text Summarization (TSum)
-Model used: google/flan-t5-xl
-Prompt used: "summarize : " + text from step 1
+Model used: google/flan-t5-xl<br/>
+Prompt used: "summarize : " + text from step 1<br/>
 Check file for implementation
 
 # Step 3: Text-to-Speech (TTS)
-Checkpoint used: microsoft/speecht5_tts
-Dataset used: Matthijs/cmu-arctic-xvectors
-Vocoder used: microsoft/speecht5_hifigan
+Checkpoint used: microsoft/speecht5_tts<br/>
+Dataset used: Matthijs/cmu-arctic-xvectors<br/>
+Vocoder used: microsoft/speecht5_hifigan<br/>
 Check file for implementation
 
 Expected input is an audio file, and an audio playback will be outputted, which can be modified to be outputted to a file if desired.
 
-Links to the HF NLP and Audio courses for more information:
-https://huggingface.co/learn/nlp-course/chapter0/1
+Links to the HF NLP and Audio courses for more information:<br/>
+https://huggingface.co/learn/nlp-course/chapter0/1<br/>
 https://huggingface.co/learn/audio-course/en/chapter0/introduction
