@@ -4,14 +4,14 @@ Function that takes in an audio file and outputs a summarized audio file using v
 
 This is a short, entry-level function that takes in an audio file, transcribes it, summarizes the text, then outputs a TTS representation of the summary. All models and datasets used come from the HuggingFace library, and most implementations follow the examples given in the NLP and Audio courses on HF.
 
-Necessary packages:
-transformers
-datasets
-IPython.display
-torch
-gradio
-soundfile
-ffmpeg
+Necessary packages:<br/>
+transformers<br/>
+datasets<br/>
+IPython.display<br/>
+torch<br/>
+gradio<br/>
+soundfile<br/>
+ffmpeg<br/>
 
 # Step 1: Automatic Speech Recognition (ASR)
 Model used: openai/whisper-large-v3<br/>
